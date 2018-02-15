@@ -4,6 +4,7 @@ import "./App.css";
 import Dropzone from "react-dropzone";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
+import { Line as LineChart } from 'react-chartjs'
 
 var config = {
   apiKey: "AIzaSyBCvx1WFPYOutNvj8Hfmu_jTuxoWEQvPHc",
@@ -16,6 +17,53 @@ var config = {
 
 if (firebase.apps.length === 0) {
   firebase.initializeApp(config);
+}
+
+const constructData = (labels, data1, data2) => {
+    return {
+        labels: labels,
+        datasets: [
+            {
+                label: "PM2.5",
+                fillColor: "rgba(220,220,220,0.2)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: data1
+            },
+            {
+                label: "PM10",
+                fillColor: "rgba(151,187,205,0.2)",
+                strokeColor: "rgba(151,187,205,1)",
+                pointColor: "rgba(151,187,205,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(151,187,205,1)",
+                data: data2
+            }
+        ]
+    }
+}
+
+const makeChartData = (readings) => {
+    const PM25Data = []
+    const PM10Data = []
+    const timeLabels = []
+    readings.forEach((reading) => {
+        PM25Data.push(reading.PM25)
+        PM10Data.push(reading.PM10)
+        timeLabels.push(reading.time)
+    })
+
+    if (timeLabels.length > 0) {
+        const data = constructData(timeLabels, PM25Data, PM10Data)
+        return data
+    } else {
+        const data = constructData([], [], [])
+        return data
+    }
 }
 
 class App extends Component {
@@ -89,6 +137,7 @@ class App extends Component {
   }
 
   render() {
+      makeChartData(this.state.readings)
     return (
       <div>
         <div className="dropzone">
@@ -149,6 +198,8 @@ class App extends Component {
           />
           <br />
         </div>
+
+          <LineChart data={makeChartData(this.state.readings)} width="1200" height="600"/>
       </div>
     );
   }
