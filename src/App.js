@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import "./App.css";
 import Dropzone from "react-dropzone";
-import ReactTable from 'react-table'
-import 'react-table/react-table.css'
+import ReactTable from "react-table";
+import "react-table/react-table.css";
 
 class App extends Component {
   constructor(props) {
@@ -13,32 +13,32 @@ class App extends Component {
   }
 
   onDrop(e) {
+    if (e[0]) {
       const reader = new FileReader();
       reader.onload = () => {
-          const csv = reader.result
-          var lines=csv.split("\n");
+        const csv = reader.result;
+        var lines = csv.split("\n");
 
-          var result = [];
+        var result = [];
 
-          var headers=lines[0].split(",");
+        var headers = lines[0].split(",");
 
-          for(var i=1;i<lines.length;i++){
+        for (var i = 1; i < lines.length; i++) {
+          var obj = {};
+          var currentline = lines[i].split(",");
 
-              var obj = {};
-              var currentline=lines[i].split(",");
-
-              for(var j=0;j<headers.length;j++){
-                  obj[headers[j].replace(/\./g, '')] = currentline[j];
-              }
-
-              result.push(obj);
-
+          for (var j = 0; j < headers.length; j++) {
+            obj[headers[j].replace(/\./g, "")] = currentline[j];
           }
 
-          this.setState({ readings: result })
+          result.push(obj);
+        }
+
+        this.setState({ readings: result });
       };
 
       reader.readAsBinaryString(e[0]);
+    }
   }
 
   render() {
@@ -56,40 +56,40 @@ class App extends Component {
           <ReactTable
             data={this.state.readings}
             columns={[
-                {
-                    Header: "Date",
-                    accessor: "date"
-                },
-                {
-                    Header: "Time",
-                    accessor: "time"
-                },
-                {
-                    Header: "Longitude",
-                    accessor: "longitude"
-                },
-                {
-                    Header: "Latitude",
-                    accessor: "latitude"
-                },
-                {
-                    Header: "Pressure",
-                    accessor: "pressure"
-                },
-                {
-                    Header: "Temperature",
-                    accessor: "temperature"
-                },
-                {
-                    Header: "PM2.5",
-                    accessor: "PM25"
-                },
-                {
-                    Header: "PM10",
-                    accessor: "PM10"
-                }
+              {
+                Header: "Date",
+                accessor: "date"
+              },
+              {
+                Header: "Time",
+                accessor: "time"
+              },
+              {
+                Header: "Longitude",
+                accessor: "longitude"
+              },
+              {
+                Header: "Latitude",
+                accessor: "latitude"
+              },
+              {
+                Header: "Pressure",
+                accessor: "pressure"
+              },
+              {
+                Header: "Temperature",
+                accessor: "temperature"
+              },
+              {
+                Header: "PM2.5",
+                accessor: "PM25"
+              },
+              {
+                Header: "PM10",
+                accessor: "PM10"
+              }
             ]}
-            defaultPageSize={10}
+            defaultPageSize={20}
             className="-striped -highlight"
           />
           <br />
