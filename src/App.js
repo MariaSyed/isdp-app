@@ -3,8 +3,6 @@ import "./App.css";
 import Dropzone from "react-dropzone";
 import ReactTable from 'react-table'
 import 'react-table/react-table.css'
-import axios from 'axios'
-import neatCsv from './lib/neat-csv'
 
 class App extends Component {
   constructor(props) {
@@ -15,18 +13,32 @@ class App extends Component {
   }
 
   onDrop(e) {
-      const that = this
-      axios.get(e[0].preview)
-          .then(function (response) {
-              neatCsv(response.data || "").then(data => {
-                  if (data) {
-                      that.setState({ readings: data })
-                  }
-              });
-          })
-          .catch(function (error) {
-              console.log(error);
-          })
+      const reader = new FileReader();
+      reader.onload = () => {
+          const csv = reader.result
+          var lines=csv.split("\n");
+
+          var result = [];
+
+          var headers=lines[0].split(",");
+
+          for(var i=1;i<lines.length;i++){
+
+              var obj = {};
+              var currentline=lines[i].split(",");
+
+              for(var j=0;j<headers.length;j++){
+                  obj[headers[j].replace(/\./g, '')] = currentline[j];
+              }
+
+              result.push(obj);
+
+          }
+
+          this.setState({ readings: result })
+      };
+
+      reader.readAsBinaryString(e[0]);
   }
 
   render() {
@@ -70,7 +82,7 @@ class App extends Component {
                 },
                 {
                     Header: "PM2.5",
-                    accessor: "PM2%5"
+                    accessor: "PM25"
                 },
                 {
                     Header: "PM10",
