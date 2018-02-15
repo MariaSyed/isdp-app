@@ -39,6 +39,17 @@ body {
 }
 
 .instructions {
-  margin: 30px auto;
-  width: 180px;
+  text-align: center;
+}
+
+.reset-btn {
+  width: 170px;
+  height: 40px;
+  color: white;
+  text-align: center;
+  background-color: rebeccapurple;
+  margin-right: 20px;
+  margin-left: auto;
+  margin-bottom: 20px;
+  display: block;
 }
