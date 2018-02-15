@@ -103,9 +103,9 @@ class App extends Component {
           <i>Click on headings to sort</i>
         </div>
 
-          <button className="reset-btn" onClick={this.deleteAllData}>
-              Click here to remove all data
-          </button>
+          {/*<button className="reset-btn" onClick={this.deleteAllData}>*/}
+              {/*Click here to remove all data*/}
+          {/*</button>*/}
 
         <div>
           <ReactTable
