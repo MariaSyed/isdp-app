@@ -18,31 +18,15 @@ class App extends Component {
       const that = this
       axios.get(e[0].preview)
           .then(function (response) {
-              neatCsv(response.data).then(data => {
-                  that.setState({ readings: data })
+              neatCsv(response.data || "").then(data => {
+                  if (data) {
+                      that.setState({ readings: data })
+                  }
               });
           })
           .catch(function (error) {
               console.log(error);
           })
-  }
-
-  convertToReadingsArray(data) {
-    const titles = data[0]; // assuming first array is always the titles
-    const entries = data.slice(1); // assuming everything other than first row are entries
-    const readings = [];
-    entries.forEach(entry => {
-      let newReading = {};
-      for (let i = 0; i < titles.length; i++) {
-          const key = titles[i].includes(".") ? titles[i].replace(/\./g , "") : titles[i]
-        Object.assign(newReading, { [key]: entry[i] || "" });
-      }
-      if (Object.keys(newReading).length === titles.length) {
-        readings.push(newReading);
-      }
-    });
-    console.log("READINGS: ", readings);
-    this.setState({ readings });
   }
 
   render() {
