@@ -1,43 +1,75 @@
 import React, { Component } from "react";
+import firebase from 'firebase'
 import "./App.css";
 import Dropzone from "react-dropzone";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 
+var config = {
+    apiKey: "AIzaSyBCvx1WFPYOutNvj8Hfmu_jTuxoWEQvPHc",
+    authDomain: "isdp-954b3.firebaseapp.com",
+    databaseURL: "https://isdp-954b3.firebaseio.com",
+    projectId: "isdp-954b3",
+    storageBucket: "isdp-954b3.appspot.com",
+    messagingSenderId: "195263147810"
+};
+
+if (firebase.apps.length === 0) {
+    firebase.initializeApp(config);
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      readings: []
+        readings: [],
+        dropzoneText: 'Dropping your csv file here, or click to select file to upload.',
+        fileIncorrect: false
     };
+  }
+
+  componentDidMount() {
+      firebase.database().ref('/readings').on('value', (snapshot) => {
+          if (snapshot.val()) {
+              console.log('values! ', snapshot.val())
+              const readings = Object.values(snapshot.val())
+              this.setState({ readings })
+          }
+      })
   }
 
   onDrop(e) {
     if (e[0]) {
       const reader = new FileReader();
       reader.onload = () => {
-        const csv = reader.result;
-        var lines = csv.split("\n");
+        const csv = reader.result.replace(/\r/g,'')
+        let lines = csv.split("\n");
 
-        var result = [];
+        let headers = lines[0].split(",");
 
-        var headers = lines[0].split(",");
+        if (headers.find((h) => h.includes('date') || h.includes('temperature'))) {
 
-        for (var i = 1; i < lines.length; i++) {
-          var obj = {};
-          var currentline = lines[i].split(",");
+            for (let i = 1; i < lines.length; i++) {
+                let obj = {};
+                let currentline = lines[i].split(",");
 
-          for (var j = 0; j < headers.length; j++) {
-            obj[headers[j].replace(/\./g, "")] = currentline[j];
-          }
 
-          result.push(obj);
+                for (let j = 0; j < headers.length; j++) {
+                    if (currentline[j] && headers[j]) {
+                        obj[headers[j].replace(/\./g, '')] = currentline[j];
+                    }
+                }
+
+                firebase.database().ref('/readings').push(obj)
+            }
+        } else {
+            this.setState({ dropzoneText: 'Incorrect fields in file! Could not parse', fileIncorrect: true })
         }
-
-        this.setState({ readings: result });
-      };
+      }
 
       reader.readAsBinaryString(e[0]);
+    } else {
+        this.setState({ dropzoneText: 'Incorrect file format!', fileIncorrect: true   })
     }
   }
 
@@ -46,11 +78,13 @@ class App extends Component {
       <div>
         <div className="dropzone">
           <Dropzone onDrop={this.onDrop.bind(this)}>
-            <p>
-              Dropping your csv file here, or click to select file to upload.
+            <p style={this.state.fileIncorrect ? { color: 'red' } : {}}>
+                { this.state.dropzoneText }
             </p>
           </Dropzone>
         </div>
+
+          <div className="instructions"><i>Click on headings to sort</i></div>
 
         <div>
           <ReactTable
